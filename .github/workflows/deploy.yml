@@ -24,7 +24,7 @@ jobs:
         with:
           filters: |
             root:
-              - 'gaming-platform-root/**'
+              - 'gaming-platform-navigation/**'
             api:
               - 'gaming-platform-api/**'  
             home:
@@ -45,23 +45,23 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
-          cache-dependency-path: 'gaming-platform-root/package-lock.json'
+          cache-dependency-path: 'gaming-platform-navigation/package-lock.json'
       
       - name: Install dependencies
         run: |
-          cd gaming-platform-root
+          cd gaming-platform-navigation
           npm ci
       
       - name: Build
         run: |
-          cd gaming-platform-root
+          cd gaming-platform-navigation
           npm run build
       
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
           name: root-dist
-          path: gaming-platform-root/dist/
+          path: gaming-platform-navigation/dist/
 
   # 构建 API 服务
   build-api:
