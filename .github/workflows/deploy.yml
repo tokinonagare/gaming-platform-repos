@@ -1,0 +1,211 @@
+# Gaming Platform CI/CD Pipeline
+name: Deploy Gaming Platform
+
+on:
+  push:
+    branches:
+      - main
+      - production
+  workflow_dispatch:
+
+jobs:
+  # 检测变更的服务
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      root: ${{ steps.changes.outputs.root }}
+      api: ${{ steps.changes.outputs.api }}
+      home: ${{ steps.changes.outputs.home }}
+      games: ${{ steps.changes.outputs.games }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            root:
+              - 'gaming-platform-root/**'
+            api:
+              - 'gaming-platform-api/**'  
+            home:
+              - 'gaming-platform-home/**'
+            games:
+              - 'gaming-platform-games/**'
+
+  # 构建 Root 应用
+  build-root:
+    needs: changes
+    if: ${{ needs.changes.outputs.root == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 'gaming-platform-root/package-lock.json'
+      
+      - name: Install dependencies
+        run: |
+          cd gaming-platform-root
+          npm ci
+      
+      - name: Build
+        run: |
+          cd gaming-platform-root
+          npm run build
+      
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: root-dist
+          path: gaming-platform-root/dist/
+
+  # 构建 API 服务
+  build-api:
+    needs: changes
+    if: ${{ needs.changes.outputs.api == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 'gaming-platform-api/package-lock.json'
+      
+      - name: Install dependencies
+        run: |
+          cd gaming-platform-api
+          npm ci
+      
+      - name: Build
+        run: |
+          cd gaming-platform-api
+          npm run build
+      
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: api-dist
+          path: gaming-platform-api/dist/
+
+  # 构建 Home 服务
+  build-home:
+    needs: changes
+    if: ${{ needs.changes.outputs.home == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 'gaming-platform-home/package-lock.json'
+      
+      - name: Install dependencies
+        run: |
+          cd gaming-platform-home
+          npm ci
+      
+      - name: Build
+        run: |
+          cd gaming-platform-home
+          npm run build
+      
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: home-dist
+          path: gaming-platform-home/dist/
+
+  # 部署到生产环境
+  deploy:
+    needs: [changes, build-root, build-api, build-home]
+    if: |
+      always() && 
+      (needs.build-root.result == 'success' || needs.build-root.result == 'skipped') &&
+      (needs.build-api.result == 'success' || needs.build-api.result == 'skipped') &&
+      (needs.build-home.result == 'success' || needs.build-home.result == 'skipped')
+    runs-on: ubuntu-latest
+    environment: production
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      # 下载构建产物
+      - name: Download root artifacts
+        if: ${{ needs.changes.outputs.root == 'true' }}
+        uses: actions/download-artifact@v3
+        with:
+          name: root-dist
+          path: ./deploy/root/
+      
+      - name: Download API artifacts  
+        if: ${{ needs.changes.outputs.api == 'true' }}
+        uses: actions/download-artifact@v3
+        with:
+          name: api-dist
+          path: ./deploy/api/
+      
+      - name: Download Home artifacts
+        if: ${{ needs.changes.outputs.home == 'true' }}
+        uses: actions/download-artifact@v3
+        with:
+          name: home-dist
+          path: ./deploy/home/
+      
+      # 部署到服务器
+      - name: Deploy to server
+        uses: appleboy/ssh-action@v0.1.5
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.PORT }}
+          script: |
+            # 创建部署目录
+            sudo mkdir -p /var/www/gaming-platform
+            sudo mkdir -p /var/www/gaming-platform-api
+            sudo mkdir -p /var/www/gaming-platform-home
+            
+            # 备份当前版本
+            sudo cp -r /var/www/gaming-platform /var/backups/gaming-platform-$(date +%Y%m%d_%H%M%S) || true
+            
+            # 更新代码 (这里需要根据实际情况调整)
+            cd /path/to/your/repos
+            git pull origin main
+            
+            # 运行部署脚本
+            sudo ./deploy.sh deploy
+            
+            # 重启 Nginx
+            sudo systemctl reload nginx
+            
+            # 健康检查
+            sleep 5
+            curl -f http://localhost/health || exit 1
+
+  # 通知
+  notify:
+    needs: [deploy]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Notify success
+        if: ${{ needs.deploy.result == 'success' }}
+        run: |
+          echo "🎉 部署成功!"
+          # 这里可以集成 Slack、企业微信等通知
+      
+      - name: Notify failure
+        if: ${{ needs.deploy.result == 'failure' }}
+        run: |
+          echo "❌ 部署失败!"
+          # 这里可以集成错误通知
