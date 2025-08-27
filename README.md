@@ -70,32 +70,16 @@ npm install && npm run build && npm run preview
 # 访问: http://localhost:3000 (主入口)
 ```
 
-### 一键启动脚本
+### 启动脚本使用
 ```bash
-# 创建启动脚本
-cat > start-all.sh << 'EOF'
-#!/bin/bash
-echo "🚀 启动Gaming Platform所有服务..."
+# 交互式启动 (默认，包含进度显示和信号处理)
+./start.sh
 
-# 启动API服务
-echo "📡 启动API服务..."
-cd gaming-platform-api && npm run dev &
+# 简单并行启动
+./start.sh --simple
 
-# 启动微应用
-echo "🏠 启动Home应用..."
-cd ../gaming-platform-home && npm run build && npm run preview &
-
-echo "🎮 启动Game应用..."  
-cd ../gaming-platform-game && npm run build && npm run preview &
-
-echo "🌐 启动Container应用..."
-cd ../gaming-platform-container && npm run build && npm run preview &
-
-wait
-EOF
-
-chmod +x start-all.sh
-./start-all.sh
+# 查看帮助信息
+./start.sh --help
 ```
 
 ## 📦 项目结构与GitHub仓库
@@ -117,9 +101,8 @@ gaming-platform-repos/          # 主仓库 (本项目)
 ├── gaming-platform-home/       # Home微服务 → GitHub独立仓库
 ├── gaming-platform-game/       # Game微服务 → GitHub独立仓库
 ├── gaming-platform-api/        # API服务 → GitHub独立仓库
-├── start.sh                     # 启动所有服务脚本
-├── stop.sh                      # 停止所有服务脚本
-└── start-all.sh                 # 简化启动脚本
+├── start.sh                     # 启动脚本 (支持交互式和简单模式)
+└── stop.sh                      # 停止所有服务脚本
 ```
 
 ## 🌐 服务端口分配
