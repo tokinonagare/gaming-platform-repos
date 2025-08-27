@@ -2,6 +2,17 @@
 
 基于Module Federation架构的现代化游戏平台，采用微前端设计实现高度模块化和可维护性。
 
+## 🚀 快速访问
+
+**GitHub仓库:** 
+- 🏠 **主仓库**: [gaming-platform-repos](https://github.com/tokinonagare/gaming-platform-repos) (本项目)
+- 🌐 **Container**: [gaming-platform-container](https://github.com/tokinonagare/gaming-platform-container) - 微前端容器
+- 🏡 **Home**: [gaming-platform-home](https://github.com/tokinonagare/gaming-platform-home) - 首页微应用  
+- 🎮 **Game**: [gaming-platform-game](https://github.com/tokinonagare/gaming-platform-game) - 游戏库微应用
+- 📡 **API**: [gaming-platform-api](https://github.com/tokinonagare/gaming-platform-api) - 后端API服务
+
+**在线演示:** 🌍 [http://localhost:3000](http://localhost:3000) (本地启动后访问)
+
 ## 🏗️ 系统架构
 
 ### 微服务架构图
@@ -87,29 +98,28 @@ chmod +x start-all.sh
 ./start-all.sh
 ```
 
-## 📦 项目结构
+## 📦 项目结构与GitHub仓库
 
+每个微服务都有独立的GitHub仓库，支持独立开发和部署：
+
+| 微服务 | GitHub仓库 | 端口 | 描述 |
+|--------|------------|------|------|
+| **Container** | 🔗 [gaming-platform-container](https://github.com/tokinonagare/gaming-platform-container) | 3000 | 微前端容器主应用 |
+| **Home** | 🔗 [gaming-platform-home](https://github.com/tokinonagare/gaming-platform-home) | 3001 | 首页微应用 |
+| **Game** | 🔗 [gaming-platform-game](https://github.com/tokinonagare/gaming-platform-game) | 3002 | 游戏库微应用 |
+| **API** | 🔗 [gaming-platform-api](https://github.com/tokinonagare/gaming-platform-api) | 3101 | 后端API服务 |
+
+### 本地开发目录结构
 ```
-gaming-platform-repos/
+gaming-platform-repos/          # 主仓库 (本项目)
 ├── README.md                    # 项目总览 (本文件)
-├── gaming-platform-container/   # 微前端容器 (端口3000)
-│   ├── src/App.jsx             # 主容器组件
-│   ├── vite.config.js          # Module Federation Host配置
-│   └── README.md               # Container详细文档
-├── gaming-platform-home/       # 首页微应用 (端口3001) 
-│   ├── src/App.jsx             # 首页组件
-│   ├── src/services/gameApi.js # 游戏API服务
-│   ├── vite.config.js          # Module Federation Remote配置
-│   └── README.md               # Home详细文档
-├── gaming-platform-game/       # 游戏库微应用 (端口3002)
-│   ├── src/App.jsx             # 游戏库组件
-│   ├── src/components/         # 游戏相关组件
-│   ├── vite.config.js          # Module Federation Remote配置
-│   └── README.md               # Game详细文档
-└── gaming-platform-api/        # API后端服务 (端口3101)
-    ├── src/server.js           # Express服务器
-    ├── package.json            # API依赖配置
-    └── README.md               # API详细文档
+├── gaming-platform-container/   # Container微服务 → GitHub独立仓库
+├── gaming-platform-home/       # Home微服务 → GitHub独立仓库
+├── gaming-platform-game/       # Game微服务 → GitHub独立仓库
+├── gaming-platform-api/        # API服务 → GitHub独立仓库
+├── start.sh                     # 启动所有服务脚本
+├── stop.sh                      # 停止所有服务脚本
+└── start-all.sh                 # 简化启动脚本
 ```
 
 ## 🌐 服务端口分配
@@ -286,12 +296,16 @@ curl http://localhost:3101/health
 lsof -i :3000,:3001,:3002,:3101
 ```
 
-## 📚 更多文档
+## 📚 详细文档
 
-- [Container应用详细文档](./gaming-platform-container/README.md)
-- [Home应用详细文档](./gaming-platform-home/README.md)  
-- [Game应用详细文档](./gaming-platform-game/README.md)
-- [API服务详细文档](./gaming-platform-api/README.md)
+每个微服务都有完整的独立文档：
+
+| 微服务 | 本地文档 | GitHub文档 | 功能说明 |
+|--------|----------|------------|----------|
+| **Container** | 📄 [本地文档](./gaming-platform-container/README.md) | 🌐 [GitHub文档](https://github.com/tokinonagare/gaming-platform-container#readme) | Module Federation配置、导航管理 |
+| **Home** | 📄 [本地文档](./gaming-platform-home/README.md) | 🌐 [GitHub文档](https://github.com/tokinonagare/gaming-platform-home#readme) | 首页业务、API集成 |
+| **Game** | 📄 [本地文档](./gaming-platform-game/README.md) | 🌐 [GitHub文档](https://github.com/tokinonagare/gaming-platform-game#readme) | 游戏库管理、搜索功能 |
+| **API** | 📄 [本地文档](./gaming-platform-api/README.md) | 🌐 [GitHub文档](https://github.com/tokinonagare/gaming-platform-api#readme) | 后端接口、数据服务 |
 
 ## 🤝 贡献指南
 
